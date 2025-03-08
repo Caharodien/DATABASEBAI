@@ -1,15 +1,16 @@
 document.addEventListener("DOMContentLoaded", function () {
     // Elements
-    const hotTab = document.querySelector(".tab:nth-child(1)"); // HOT Button
-    const coldTab = document.querySelector(".tab:nth-child(2)"); // COLD Button
+    const hotTab = document.getElementById("hot-tab");
+    const coldTab = document.getElementById("cold-tab");
     const hotMenu = document.getElementById("hot-menu");
     const coldMenu = document.getElementById("cold-menu");
     const startAgain = document.getElementById("start-again");
     const confirmModal = document.getElementById("confirm-modal");
     const confirmYes = document.getElementById("confirm-yes");
     const confirmNo = document.getElementById("confirm-no");
-    const totalPriceElement = document.querySelector(".total");
-    const orderListElement = document.querySelector(".order-list");
+    const totalPriceElement = document.getElementById("total-price");
+    const orderItemsElement = document.getElementById("order-items");
+    const proceedCheckout = document.getElementById("proceed-checkout");
 
     let totalPrice = 0;
     let orderList = [];
@@ -41,7 +42,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // If Yes is clicked - Redirect to D&T.html
     confirmYes.addEventListener("click", function () {
-        window.location.href = "D&T.html"; 
+        localStorage.clear(); // Clear the order
+        window.location.href = "D&T.html";
     });
 
     // If No is clicked - Close Modal
@@ -52,8 +54,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Add event listeners to all menu items
     document.querySelectorAll(".item").forEach(item => {
         item.addEventListener("click", function () {
-            let itemName = this.querySelector("p").innerText;
-            addToOrder(itemName, 39); // Assuming each item costs ₱39
+            const itemName = this.querySelector("p").innerText;
+            const itemPrice = 39; // Assuming each item costs ₱39
+            addToOrder(itemName, itemPrice);
         });
     });
 
@@ -76,14 +79,14 @@ document.addEventListener("DOMContentLoaded", function () {
     // Update order list display
     function updateOrderList() {
         // Update total price
-        totalPriceElement.innerText = `Total: ₱${totalPrice}`;
+        totalPriceElement.textContent = totalPrice;
 
         // Update order list UI
-        orderListElement.innerHTML = "";
+        orderItemsElement.innerHTML = "";
         orderList.forEach((item, index) => {
-            let li = document.createElement("li");
+            const li = document.createElement("li");
             li.innerHTML = `${item.name} - ₱${item.price} <button class="remove-btn" data-index="${index}">❌</button>`;
-            orderListElement.appendChild(li);
+            orderItemsElement.appendChild(li);
         });
 
         // Add event listeners to delete buttons
@@ -98,17 +101,26 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.setItem("totalPrice", totalPrice);
     }
 
-    // Restart order
-    window.restartOrder = function () {
-        localStorage.clear();
-        totalPrice = 0;
-        orderList = [];
+    // Proceed to checkout
+    proceedCheckout.addEventListener("click", function () {
+        if (orderList.length === 0) {
+            alert("Your order is empty. Please add items to proceed.");
+            return;
+        }
+        window.location.href = "checkout.html";
+    });
+
+    // Load order from localStorage on page load
+    function loadOrder() {
+        const savedOrderList = JSON.parse(localStorage.getItem("orderList")) || [];
+        const savedTotalPrice = parseFloat(localStorage.getItem("totalPrice")) || 0;
+
+        orderList = savedOrderList;
+        totalPrice = savedTotalPrice;
 
         updateOrderList();
-    };
+    }
 
-    // Proceed to checkout
-    window.checkout = function () {
-        alert(`Proceeding to checkout. Total: ₱${totalPrice}`);
-    };
+    // Load order when the page loads
+    loadOrder();
 });
