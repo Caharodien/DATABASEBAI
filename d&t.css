@@ -46,3 +46,15 @@ h1 {
     font-size: 18px;
     margin-top: 10px;
 }
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #3c2a22;
+    padding: 10px 20px;
+}
+
+.logo {
+    height: 50px; /* Adjust size as needed */
+}
